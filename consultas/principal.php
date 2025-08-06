@@ -3,6 +3,7 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 include_once("../config.php");
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -38,44 +39,38 @@ include_once("../config.php");
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="index.php">Home</a>
+                            <a class="nav-link active" aria-current="page" href="principal.php">Home</a>
                         </li>
                         <li class="nav-item dropdown nav-color">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">Docentes</a>
                             <ul class="dropdown-menu">
-    <li><a class="dropdown-item" data-value="guarani">Docentes con Asignación Aulica</a></li>
-    <li><a class="dropdown-item" data-value="mapuche">Docentes con Designación</a></li>
-    
-    <!-- Ítem con submenú -->
-    <li class="dropdown-submenu">
-  <a class="dropdown-item dropdown-toggle" data-value="combinados">Docentes - Unificado</a>
-  <ul class="dropdown-menu">
-    <!-- Submenú de años (sin funcionalidad) -->
-    <li><a class="dropdown-item year-item">2011</a></li>
-    <li><a class="dropdown-item year-item">2012</a></li>
-    <li><a class="dropdown-item year-item">2013</a></li>
-    <li><a class="dropdown-item year-item">2014</a></li>
-    <li><a class="dropdown-item year-item">2015</a></li>
-    <li><a class="dropdown-item year-item">2016</a></li>
-    <li><a class="dropdown-item year-item">2017</a></li>
-    <li><a class="dropdown-item year-item">2018</a></li>
-    <li><a class="dropdown-item year-item">2019</a></li>
-    <li><a class="dropdown-item year-item">2020</a></li>
-    <li><a class="dropdown-item year-item">2021</a></li>
-    <li><a class="dropdown-item year-item">2022</a></li>
-    <li><a class="dropdown-item year-item">2023</a></li>
-    <li><a class="dropdown-item year-item">2024</a></li>
-    <li><a class="dropdown-item year-item">2025</a></li>
-  </ul>
-</li>
-
-</ul>
-
+                                <li><a class="dropdown-item" href="#" data-value="guarani">Docentes con Asignación Aulica</a></li>
+                                <li><a class="dropdown-item" href="#" data-value="mapuche">Docentes con Designación</a></li>
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle" href="#" data-value="combinados">Docentes - Unificado</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2011">2011</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2012">2012</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2013">2013</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2014">2014</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2015">2015</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2016">2016</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2017">2017</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2018">2018</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2019">2019</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2020">2020</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2021">2021</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2022">2022</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2023">2023</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2024">2024</a></li>
+                                        <li><a class="dropdown-item year-item" href="#" data-value="combinados-2025">2025</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
                         </li>
                     </ul>
 
-                    <!-- Contenedor del filtro -->
                     <div class="filter-container">
                         <label for="filterInput" class="filter-label">Filtrar:</label>
                         <input type="text" id="filterInput" class="form-control filter-input" placeholder="Nombre/Apellido" />
@@ -104,7 +99,6 @@ include_once("../config.php");
         <footer class="app-footer">
             <p>TINKUY v.1.0 &copy; 2025 - Desarrollado por el Área de Sistemas de la UNDAV.</p>
         </footer>
-
     </div>
 
     <!-- Scripts -->
@@ -143,10 +137,16 @@ include_once("../config.php");
             selectionTitle.textContent = `${currentSelectionText}`;
 
             try {
-                const response = await fetch(
-                    `${baseURL}?action=getData&type=${currentQueryType}&page=${currentPage}&search=${encodeURIComponent(currentSearchTerm)}`
-                );
-                if (!response.ok) throw new Error('Error en la respuesta del servidor');
+                const url = `${baseURL}?action=getData&type=${currentQueryType}&page=${currentPage}&search=${encodeURIComponent(currentSearchTerm)}`;
+                console.log("URL de solicitud:", url);
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Detalles del error:", errorText);
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
 
                 const data = await response.json();
                 if (!data.success) throw new Error(data.error || 'Error desconocido');
@@ -157,14 +157,12 @@ include_once("../config.php");
                 if (currentSearchTerm) {
                     html += `<p class="search-info">Filtrado por: <strong>${currentSearchTerm}</strong></p>`;
                 }
-
                 html += `
                 <div class="table-scroll-container">
                     <div class="table-scroll-top" id="topScroll"></div>
                     <div class="table-wrapper" id="tableWrapper">
                         <table class="table table-striped table-bordered" style="width:100%; margin:0">
                             <thead><tr>`;
-
                 if (data.data.length > 0) {
                     Object.keys(data.data[0]).forEach(key => {
                         html += `<th style="white-space: nowrap">${key}</th>`;
@@ -177,21 +175,15 @@ include_once("../config.php");
                         });
                         html += '</tr>';
                     });
-
                     html += '</tbody></table></div></div>';
                     resultsContainer.innerHTML = html;
                     exportButtons.style.display = 'flex';
                     exportButtons.style.gap = '10px';
-
-                    // Sincronización scroll horizontal superior e inferior
                     setTimeout(() => {
                         const topScroll = document.getElementById('topScroll');
                         const tableWrapper = document.getElementById('tableWrapper');
-
                         if (topScroll && tableWrapper) {
-                            // Ajustar el ancho del scroll superior para que coincida con la tabla
                             topScroll.scrollLeft = 0;
-                            // Crear un div fantasma para ocupar ancho igual al scroll de la tabla
                             if (!topScroll.querySelector('.ghost')) {
                                 const ghostDiv = document.createElement('div');
                                 ghostDiv.className = 'ghost';
@@ -199,7 +191,6 @@ include_once("../config.php");
                                 ghostDiv.style.height = '1px';
                                 topScroll.appendChild(ghostDiv);
                             }
-
                             topScroll.onscroll = () => {
                                 tableWrapper.scrollLeft = topScroll.scrollLeft;
                             };
@@ -211,8 +202,6 @@ include_once("../config.php");
                 } else {
                     resultsContainer.innerHTML = '<div class="alert alert-info">No se encontraron resultados.</div>';
                 }
-
-                // Paginación
                 const { current_page, total_pages } = data.pagination;
                 let pagHtml = '<nav aria-label="Page navigation"><ul class="pagination justify-content-center">';
                 if (current_page > 1) {
@@ -322,83 +311,123 @@ include_once("../config.php");
         }
 
         async function secureLogout() {
-            try {
-                await fetch('logout.php', { method: 'POST' });
-                await Swal.fire({
-                    title: '¡Sesión cerrada!',
-                    text: 'Vuelve pronto 😊',
-                    icon: 'success',
-                    confirmButtonColor: '#2c3e50',
-                    background: '#fff',
-                    timer: 2000
-                });
-                window.location.replace(`../login/index.html?nocache=${Date.now()}`);
-            } catch (error) {
-                Swal.fire('Error', 'No se pudo cerrar sesión', 'error');
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('logoutBtn').addEventListener('click', secureLogout);
-            document.getElementById('refreshBtn').addEventListener('click', () => {
-                currentPage = 1;
-                cargarResultados();
-            });
-            document.getElementById('filterBtn').addEventListener('click', function () {
-                currentSearchTerm = document.getElementById('filterInput').value.trim();
-                currentPage = 1;
-                cargarResultados();
-            });
-            document.getElementById('filterInput').addEventListener('keyup', function (e) {
-                if (e.key === 'Enter') {
-                    currentSearchTerm = this.value.trim();
-                    currentPage = 1;
-                    cargarResultados();
-                }
-            });
-            document.querySelectorAll('.dropdown-item').forEach(item => {
-                item.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    currentQueryType = this.dataset.value;
-                    currentSelectionText = this.textContent;
-                    currentPage = 1;
-                    currentSearchTerm = '';
-                    document.getElementById('filterInput').value = '';
-                    cargarResultados();
-                });
-            });
-            document.getElementById('excelBtn').addEventListener('click', exportarAExcel);
-            document.getElementById('pdfBtn').addEventListener('click', exportarAPDF);
+    try {
+        // Limpiar datos sensibles del cliente
+        currentQueryType = '';
+        currentSearchTerm = '';
+        
+        // Forzar limpieza de caché
+        const response = await fetch('logout.php', {
+            method: 'POST',
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            },
+            cache: 'no-store'
         });
 
-        //submenu de los años
-        document.querySelectorAll('.year-item').forEach(item => {
-    item.addEventListener('click', function () {
-        const valor = this.getAttribute('data-value'); // Ej: combinados-2014
-        console.log("Seleccionado:", valor);
-        // Acá podés hacer una consulta AJAX, redirigir, etc.
-    });
-});
+        // Verificar si la respuesta es una redirección
+        if (response.redirected) {
+            // Forzar recarga completa sin caché
+            window.location.replace(response.url + '&nocache=' + Date.now());
+            return;
+        }
 
-document.querySelectorAll('.dropdown-item').forEach(item => {
-  item.addEventListener('click', function (e) {
-    const value = this.getAttribute('data-value');
-    
-    if (value === 'combinados') {
-      // Ejecuta la acción de "Docentes - Unificado"
-      cargarDatos('combinados'); // reemplazalo por tu función real
-    } else if (value === 'guarani') {
-      cargarDatos('guarani');
-    } else if (value === 'mapuche') {
-      cargarDatos('mapuche');
+        // Mostrar confirmación y redirigir
+        await Swal.fire({
+            title: '¡Sesión cerrada!',
+            text: 'Vuelve pronto 😊',
+            icon: 'success',
+            confirmButtonColor: '#2c3e50',
+            background: '#fff',
+            timer: 2000,
+            willClose: () => {
+                // Redirección forzada con parámetros anti-caché
+                window.location.href = '../login/index.html?logout=1&nocache=' + Date.now();
+                // Limpiar el historial de navegación
+                if (window.history) {
+                    window.history.replaceState(null, '', window.location.href);
+                }
+            }
+        });
+
+    } catch (error) {
+        Swal.fire('Error', 'No se pudo cerrar sesión', 'error');
+        // Forzar redirección en caso de error
+        window.location.href = '../login/index.html?error=1&nocache=' + Date.now();
     }
+}
+// Evitar que se pueda volver atrás después de logout
+if (window.location.search.includes('logout=1')) {
+    // Limpiar el historial de navegación
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+    
+    // Deshabilitar caché
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+}
 
-    // Evita cerrar el menú si clickeaste en un submenú sin data-value
-    e.stopPropagation();
-  });
+        document.addEventListener('DOMContentLoaded', function () {
+    // Event listeners principales (sin cambios)
+    document.getElementById('logoutBtn').addEventListener('click', secureLogout);
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        currentPage = 1;
+        cargarResultados();
+    });
+    document.getElementById('filterBtn').addEventListener('click', function () {
+        currentSearchTerm = document.getElementById('filterInput').value.trim();
+        currentPage = 1;
+        cargarResultados();
+    });
+    document.getElementById('filterInput').addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') {
+            currentSearchTerm = this.value.trim();
+            currentPage = 1;
+            cargarResultados();
+        }
+    });
+    
+    // Event listeners para los items del dropdown (versión minimalista)
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            currentQueryType = this.dataset.value;
+            currentSelectionText = this.textContent;
+            currentPage = 1;
+            currentSearchTerm = '';
+            document.getElementById('filterInput').value = '';
+            cargarResultados();
+            
+            // Cierra el menú inmediatamente después de la selección
+            const dropdown = bootstrap.Dropdown.getInstance(this.closest('.dropdown').querySelector('.dropdown-toggle'));
+            if (dropdown) dropdown.hide();
+        });
+    });
+    
+    // Event listeners para los años (sin efectos)
+    document.querySelectorAll('.year-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+            currentQueryType = this.dataset.value;
+            currentSelectionText = `Docentes - Unificado ${this.textContent}`;
+            currentPage = 1;
+            currentSearchTerm = '';
+            document.getElementById('filterInput').value = '';
+            cargarResultados();
+        });
+    });
+
+    // Eliminamos completamente los event listeners de mouseleave/mouseenter
+    // que causaban los efectos no deseados
+
+    document.getElementById('excelBtn').addEventListener('click', exportarAExcel);
+    document.getElementById('pdfBtn').addEventListener('click', exportarAPDF);
 });
-
     </script>
 </body>
-
 </html>

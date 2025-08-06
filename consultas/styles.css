@@ -445,10 +445,8 @@ th {
 }
 .undav {
     width: 80px;
-    margin-top: 12px;
-    position: fixed;
     left: 10px;
-    top: 0; /* si querés que quede arriba */
+    margin-top: 10px;
 }
 
 .logo_undav {
