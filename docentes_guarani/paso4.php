@@ -1,85 +1,87 @@
 <?php
+include_once("../config.php");
+echo "==========================================================================\n";
+echo "\nPaso 3. Separando registros con múltiples docentes y extrayendo datos...\n";
+echo "==========================================================================\n";
+
 try {
-    // 1. Añadir columna código si no existe
-    echo "================================\n";
-    echo "Paso 4. Preparando estructura...\n";
-    echo "================================\n";
-    $conn->exec("ALTER TABLE public.Docentes_Guarani ADD COLUMN IF NOT EXISTS codigo_guarani VARCHAR(20)");
+    // 1. Contar registros iniciales (para comparar después)
+    $total_inicial = $conn->query("SELECT COUNT(*) FROM Docentes_Guarani")->fetchColumn();
+    echo "Registros iniciales: $total_inicial\n";
 
-    // 2. Normalización del periodo y extracción del año
-    echo "4.2. Procesando periodo_guarani y año...\n";
-
-    // Extraemos el año y eliminamos la parte "YYYY - "
-    $conn->exec("
-        UPDATE public.Docentes_Guarani 
-    SET 
-    anio_guarani = SUBSTRING(periodo_guarani FROM 1 FOR 4)::INTEGER,
-    periodo_guarani = TRIM(SUBSTRING(periodo_guarani FROM 11))
-    WHERE periodo_guarani ~ '^\d{4}\s+\-\s+';
-");
-
-    // 3. Limpieza de docentes
-    echo "4.3. Limpiando nombres de docentes...\n";
-    $conn->exec("
-        UPDATE public.Docentes_Guarani 
-        SET docente_guarani = REGEXP_REPLACE(docente_guarani, '^\.\-\,\s*', '')
-        WHERE docente_guarani ~ '^\.\-\,\s*'
+    // 2. Identificar registros con múltiples docentes (separados por " - ")
+    $registros = $conn->query("
+        SELECT * FROM Docentes_Guarani 
+        WHERE docente_guarani LIKE '% - %'
     ");
 
-    // 4. Extracción de códigos de actividad
-    echo "4.4 Procesando códigos de actividad...\n";
-    
-    // Primero extraemos el código (contenido entre paréntesis)
-    $conn->exec("
-        UPDATE public.Docentes_Guarani 
-        SET codigo_guarani = SUBSTRING(
-            actividad_guarani FROM '\(([^)]+)\)'
-        )
-        WHERE actividad_guarani ~ '\([A-Za-z0-9]+\)'
-    ");
-    
-    // Luego limpiamos la actividad (eliminamos código y guión)
-    $conn->exec("
-        UPDATE public.Docentes_Guarani 
-        SET actividad_guarani = TRIM(
-            REGEXP_REPLACE(actividad_guarani, '^\([^)]+\)\s*-\s*', '')
-        )
-        WHERE actividad_guarani ~ '\([^)]+\)\s*-\s*'
-    ");
+    // 3. Procesar cada registro
+    foreach ($registros->fetchAll(PDO::FETCH_ASSOC) as $registro) {
+        // Separar docentes (usando " - " como delimitador)
+        $docentes = explode(" - ", $registro['docente_guarani']);
 
-    // 5. Verificación final
-    echo "\n4.5. Verificación de resultados:\n";
-    
-    $sample = $conn->query("
-        SELECT 
-            anio_guarani, 
-            periodo_guarani, 
-            codigo_guarani,
-            LEFT(actividad_guarani, 30) as actividad,
-            LEFT(docente_guarani, 20) as docente
-        FROM public.Docentes_Guarani 
-        LIMIT 5
-    ");
-    
-    echo str_pad("anio_guarani", 6) . 
-         str_pad("Periodo", 20) . 
-         str_pad("Código", 12) . 
-         str_pad("Actividad", 30) . 
-         "Docente\n";
-    echo str_repeat("-", 90) . "\n";
-    
-    foreach ($sample->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        echo str_pad($row['anio_guarani'], 6) . 
-             str_pad($row['periodo_guarani'], 20) . 
-             str_pad($row['codigo_guarani'] ?? '', 12) . 
-             str_pad($row['actividad'] ?? '', 30) . 
-             ($row['docente'] ?? '') . "\n";
+        // === Actualizar el primer docente en el registro original ===
+        $primero = explode(",", $docentes[0]);
+        $nombre1 = preg_replace('/^[\.\-,\s]+/', '', trim($primero[0] ?? null));
+        $tipo1 = trim($primero[1] ?? null);
+        $doc1   = trim($primero[2] ?? null);
+
+        $docente_limpio = preg_replace('/^[\.\-,\s]+/', '', trim($docentes[0]));
+
+        $conn->prepare("
+            UPDATE Docentes_Guarani 
+            SET docente_guarani = ?, ape_nom1_guarani = ?, tipo_doc1_guarani = ?, num_doc1_guarani = ?
+            WHERE id = ?
+        ")->execute([
+            $docente_limpio, $nombre1, $tipo1, $doc1,
+            $registro['id']
+        ]);
+
+        // === Insertar docentes adicionales como nuevos registros ===
+        for ($i = 1; $i < count($docentes); $i++) {
+            // Clonar el registro original
+            $nuevoRegistro = $registro;
+
+            // Eliminar el ID y datos del primer docente
+            unset(
+                $nuevoRegistro['id'],
+                $nuevoRegistro['ape_nom1_guarani'],
+                $nuevoRegistro['tipo_doc1_guarani'],
+                $nuevoRegistro['num_doc1_guarani']
+            );
+
+            // Datos del docente adicional
+            $partes = explode(",", $docentes[$i]);
+            $nombre = preg_replace('/^[\.\-,\s]+/', '', trim($partes[0] ?? null));
+            $tipo_doc = trim($partes[1] ?? null);
+            $num_doc = trim($partes[2] ?? null);
+
+            // Agregar los nuevos datos del docente
+            $nuevoRegistro['docente_guarani'] = preg_replace('/^[\.\-,\s]+/', '', trim($docentes[$i]));
+            $nuevoRegistro['ape_nom1_guarani'] = $nombre;
+            $nuevoRegistro['tipo_doc1_guarani'] = $tipo_doc;
+            $nuevoRegistro['num_doc1_guarani'] = $num_doc;
+
+            // Construir la consulta dinámica
+            $campos = implode(", ", array_keys($nuevoRegistro));
+            $placeholders = implode(", ", array_fill(0, count($nuevoRegistro), "?"));
+
+            $conn->prepare("
+                INSERT INTO Docentes_Guarani ($campos) 
+                VALUES ($placeholders)
+            ")->execute(array_values($nuevoRegistro));
+        }
     }
-    
-    echo "\nNormalización completada con éxito!\n";
-    
+
+    // 4. Verificación final
+    $total_final = $conn->query("SELECT COUNT(*) FROM Docentes_Guarani")->fetchColumn();
+    $nuevos_registros = $total_final - $total_inicial;
+
+    echo "✅ ¡Proceso completado!\n";
+    echo "Registros iniciales: $total_inicial\n";
+    echo "Registros nuevos creados: $nuevos_registros\n";
+    echo "Total de registros ahora: $total_final\n\n";
+
 } catch (PDOException $e) {
-    echo "\nError de base de datos: " . $e->getMessage() . "\n";
-} catch (Exception $e) {
-    echo "\nError general: " . $e->getMessage() . "\n";
+    echo "\n🚨 Error: " . $e->getMessage() . "\n";
 }
