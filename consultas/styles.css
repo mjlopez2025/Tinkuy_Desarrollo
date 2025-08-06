@@ -22,17 +22,25 @@ body {
 .app-main {
     flex: 1;
     padding: 1rem;
-    margin: 0 auto;
     width: 100%;
-    border-top: none;
-    border-bottom: none;
+    border-bottom: 0px;
 }
 .app-footer {
   background-color: #2c3e50;
     color: white;
-    padding: 1rem;
+    padding: 0.1rem;
     text-align: center;
 }
+footer, .app-footer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.app-footer p {
+  margin: 0.1rem; /* 1rem arriba/abajo, 0 en los lados (ajusta el valor según necesites) */
+  padding-bottom: 0.1rem; /* Espacio extra inferior solo para el texto */
+}
+
 .query-panel {
     background-color: white;
     border-radius: 8px;
@@ -42,7 +50,8 @@ body {
 .results-container {
     background-color: white;
     border-radius: 8px;
-    padding: 1rem;
+    margin-top: 0px;
+    margin-bottom: -10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 table {
@@ -209,16 +218,11 @@ tr:hover {
             100% { transform: rotate(360deg); }
         }
 
-    .selection-title {
-        background-color: #f8f9fa;
-        padding: 15px;
-        margin: 20px auto;
-        border-radius: 5px;
-        font-weight: bold;
-        text-align: center;
-        font-size: 1.25rem;
-        max-width: 80%;
-    }
+ .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto; /* Empuja los botones a la derecha */
+}
     /* Nuevas reglas para eliminar la línea gris */
     .app-container, .app-main, .query-panel {
         border: none !important;
@@ -335,12 +339,15 @@ th {
         }
     }
 
-    .header-container {
+  .header-container {
     display: flex;
-    justify-content:right; /* Elementos a extremos opuestos */
     align-items: center;
-    padding: 10px;
-    
+    justify-content: space-between; /* Distribuye los elementos */
+    margin-bottom: -3rem !important;
+    margin-top: -20px;
+    padding: 0 15px;
+    gap: 10px; /* Espacio entre elementos */
+    flex-wrap: wrap; /* Para responsive */
 }
 
 .btn-volver {
@@ -390,10 +397,10 @@ th {
     background: #FF8F00;
 }
 
-
-
 .pagination-container {
-    margin-top: 15px;
+    margin-top: 27px;
+    margin-bottom: 0 !important; /* <- Fuerza cero margen inferior */
+    padding-bottom: 0 !important; /* <- También fuerza cero padding */
     text-align: center;
 }
 
@@ -424,9 +431,11 @@ th {
     color: #888;
     font-weight: normal;
 }
+
 .logo-container {
     margin-right: calc(50% - 150px);
     width: 300px;
+    margin-top: 20px;
     flex: auto;
 }
 .logo {
@@ -465,21 +474,18 @@ th {
 
 /* Estilos para los botones de exportación */
 .export-buttons {
-    display: none; /* Inicialmente ocultos */
-    position: absolute;
-    right: 35px;
-    top: -45px;
-    z-index: 10;
+    display: flex;
+    gap: 0.5rem;
 }
 
 .query-panel {
     position: relative; /* Para que los botones se posicionen relativos a este contenedor */
-    margin-top: 20px;
+    margin-top: 0.5rem !important;
 }
 
 .table-container {
     overflow-x: auto;
-    margin-top: 10px;
+    margin-top: 70px;
 }
 
 /* Estilos para la tabla */
@@ -574,9 +580,76 @@ th {
     z-index: 2;
     color: white;
 }
+  
 
-    
+.title-export-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    padding: 0 15px;
+    flex-wrap: wrap; /* Para responsive */
+    gap: 10px;
+}
 
+.pagination-text {
+    font-weight: bold;
+    white-space: nowrap;
+    margin-right: auto; /* Empuja el título al centro */
+}
+ /* Scroll superior horizontal */
+        .table-scroll-container {
+            position: relative;
+            margin-top: 20px;
+            width: 100%;
+        }
 
+        .table-scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 20px;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+        }
 
-    
+        .table-scroll-top::-webkit-scrollbar {
+            height: 10px;
+        }
+
+        .table-scroll-top::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 4px;
+        }
+
+        /* Contenedor con scroll vertical y horizontal limitado */
+        .table-wrapper {
+    max-height: calc(100vh - 380px);
+    overflow-y: auto;
+    overflow-x: hidden;  /* ocultar scroll horizontal inferior */
+    border: 1px solid #dee2e6;
+}
+
+        .table-wrapper table {
+            margin: 0;
+            border-collapse: collapse;
+            width: 100%;
+        }
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: 0.1rem;
+    display: none;
+    position: absolute;
+    min-width: 70px; /* ↓ Hace la columna más angosta */
+    width: auto;      /* Se ajusta al contenido */
+    padding: 0;
+}
+
+.dropdown-submenu:hover > .dropdown-menu {
+    display: block;
+}
+

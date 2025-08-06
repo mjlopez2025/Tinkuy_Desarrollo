@@ -1,5 +1,9 @@
 <?php
 header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *"); // Permite cualquier dominio (¡solo para desarrollo!)
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 include_once("../config.php");
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
