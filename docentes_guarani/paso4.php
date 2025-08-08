@@ -1,82 +1,109 @@
 <?php
 include_once("../config.php");
-echo "==========================================================================\n";
-echo "\nPaso 3. Separando registros con múltiples docentes (¡sin limpiar nada! 🎻)...\n";
-echo "==========================================================================\n";
+
+// =========================================
+// SCRIPT MEJORADO PARA LIMPIAR PREFIJOS Y TIPOS DE DOC
+// =========================================
+echo "\n\n🔥 Iniciando limpieza COMPLETA en 'docentes_guarani'...\n";
+
+$tabla = 'docentes_guarani';         
+$campo = 'docente_guarani';      
+$campo_tipo_doc = 'tipo_doc_guarani'; // Columna a limpiar
 
 try {
-    // 1. Contar registros iniciales
-    $total_inicial = $conn->query("SELECT COUNT(*) FROM Docentes_Guarani")->fetchColumn();
-    echo "Registros iniciales: $total_inicial\n";
+    // ---- PARTE 1: Limpieza de prefijos ----
+    echo "🔧 FASE 1: Limpieza de prefijos\n";
+    $query = "
+        SELECT id, $campo, $campo_tipo_doc 
+        FROM $tabla 
+        WHERE $campo ~* '^(Adjunto, |Titular, |JTP, |Asociado, |Ayudante 1ra, |Ayudante 2da, |\\.-, |\\s-|^\\s*\\.,)'
+           OR $campo_tipo_doc IS NOT NULL
+    ";
+    $stmt = $conn->query($query);
+    $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Identificar registros con múltiples docentes (separados por " - ")
-    $registros_multidocentes = $conn->query("
-        SELECT COUNT(*) FROM Docentes_Guarani 
-        WHERE docente_guarani LIKE '% - %'
-    ")->fetchColumn();
-    
-    $registros = $conn->query("
-        SELECT * FROM Docentes_Guarani 
-        WHERE docente_guarani LIKE '% - %'
-    ");
+    echo "📊 Registros a procesar: " . count($registros) . "\n\n";
 
-    // Inicializar contador de progreso
     $procesados = 0;
+    $modificados = [];
+    $tipos_invalidos = 0;
+
+    // Contador de progreso
+    $total = count($registros);
     $inicio = time();
 
-    echo "\n🔍 Procesando $registros_multidocentes registros con múltiples docentes...\n";
+    foreach ($registros as $index => $registro) {
+        $id = $registro['id'];
+        $texto_original = $registro[$campo];
+        $tipo_doc_original = $registro[$campo_tipo_doc];
 
-    // 3. Procesar cada registro
-    foreach ($registros->fetchAll(PDO::FETCH_ASSOC) as $registro) {
-        $procesados++;
-        $porcentaje = round(($procesados / $registros_multidocentes) * 100, 2);
-        
-        // Mostrar progreso cada 100 registros (o ajustar según necesidad)
-        if ($procesados % 100 === 0 || $procesados === $registros_multidocentes) {
-            echo "\r🔄 Progreso: $procesados/$registros_multidocentes ($porcentaje%) | ";
-            echo "⏱️ " . (time() - $inicio) . "s | ";
-            echo "🧉 " . ceil($procesados / 2000) . " mate(s)"; // 1 mate cada 2000 registros
+        // ---- Limpieza de prefijos ----
+        $nuevo_texto = preg_replace([
+            '/^(Adjunto, |Titular, |JTP, |Asociado, |Ayudante 1ra, |Ayudante 2da, |.-, |\.-|\s-|\s*\s*)/i',
+            '/^[\s\.\-]+/',
+            '/\s*\s*(?= DNI| DNT| CI| LC)/i'
+        ], '', $texto_original);
+
+        // ---- Validación de tipo de documento ----
+        $tipo_doc_limpio = null;
+        if (!empty($tipo_doc_original)) {
+            // Mantener solo DNI, DNT, CI, LC (case-insensitive)
+            if (preg_match('/^( DNI| DNT| CI| LC)$/i', trim($tipo_doc_original))) {
+                $tipo_doc_limpio = strtoupper(trim($tipo_doc_original));
+            } else {
+                $tipos_invalidos++;
+                $tipo_doc_limpio = null; // Borrar tipos no válidos
+            }
         }
 
-        // Separar docentes (usando " - " como delimitador)
-        $docentes = explode(" - ", $registro['docente_guarani']);
+        // Solo actualizar si hubo cambios
+        if ($nuevo_texto !== $texto_original || $tipo_doc_limpio !== $tipo_doc_original) {
+            $update = $conn->prepare("
+                UPDATE $tabla 
+                SET $campo = :nuevo_texto, 
+                    $campo_tipo_doc = :tipo_doc 
+                WHERE id = :id
+            ");
+            $update->execute([
+                ':nuevo_texto' => trim($nuevo_texto),
+                ':tipo_doc' => $tipo_doc_limpio,
+                ':id' => $id
+            ]);
 
-        // === Actualizar el primer docente en el registro original ===
-        $conn->prepare("
-            UPDATE Docentes_Guarani 
-            SET docente_guarani = ?
-            WHERE id = ?
-        ")->execute([
-            trim($docentes[0]),
-            $registro['id']
-        ]);
+            $procesados++;
+            $modificados[] = [
+                'id' => $id,
+                'antes' => $texto_original,
+                'despues' => trim($nuevo_texto),
+                'tipo_antes' => $tipo_doc_original,
+                'tipo_despues' => $tipo_doc_limpio
+            ];
+        }
 
-        // === Insertar docentes adicionales ===
-        for ($i = 1; $i < count($docentes); $i++) {
-            $nuevoRegistro = $registro;
-            unset($nuevoRegistro['id']);
-            $nuevoRegistro['docente_guarani'] = trim($docentes[$i]);
-
-            $campos = implode(", ", array_keys($nuevoRegistro));
-            $placeholders = implode(", ", array_fill(0, count($nuevoRegistro), "?"));
-
-            $conn->prepare("
-                INSERT INTO Docentes_Guarani ($campos) 
-                VALUES ($placeholders)
-            ")->execute(array_values($nuevoRegistro));
+        // Mostrar progreso
+        if (($index + 1) % 100 === 0 || ($index + 1) === $total) {
+            $porcentaje = round(($index + 1) / $total * 100, 2);
+            $tiempo = time() - $inicio;
+            echo "\r🔄 Progreso: " . ($index + 1) . "/$total ($porcentaje%) | ⏱️ $tiempo seg";
+            flush();
         }
     }
 
-    // 4. Verificación final
-    $total_final = $conn->query("SELECT COUNT(*) FROM Docentes_Guarani")->fetchColumn();
-    $nuevos_registros = $total_final - $total_inicial;
-    $tiempo_total = time() - $inicio;
+    // ---- RESULTADOS ----
+    echo "\n\n✅ ¡Limpieza completada en " . (time() - $inicio) . " segundos!\n";
+    echo "📝 Registros modificados: $procesados\n";
+    echo "🚮 Tipos de documento eliminados: $tipos_invalidos\n\n";
 
-    echo "\n\n✅ ¡Separación completada en $tiempo_total segundos!\n";
-    echo "Registros iniciales: $total_inicial\n";
-    echo "Registros nuevos creados: $nuevos_registros\n";
-    echo "Total de registros ahora: $total_final\n\n";
+    // Mostrar ejemplos
+    echo "🔍 Ejemplos de cambios:\n";
+    foreach (array_slice($modificados, 0, 5) as $mod) {
+        echo "  ID {$mod['id']}:\n";
+        echo "    TEXTO ANTES: '{$mod['antes']}'\n";
+        echo "    TEXTO AHORA: '{$mod['despues']}'\n";
+        echo "    TIPO DOC ANTES: '" . ($mod['tipo_antes'] ?? 'NULL') . "'\n";
+        echo "    TIPO DOC AHORA: '" . ($mod['tipo_despues'] ?? 'NULL') . "'\n\n";
+    }
 
 } catch (PDOException $e) {
-    echo "\n🚨 Error: " . $e->getMessage() . "\n";
+    echo "\n❌ Error: " . $e->getMessage() . "\n";
 }

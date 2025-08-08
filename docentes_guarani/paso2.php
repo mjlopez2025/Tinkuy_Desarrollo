@@ -148,10 +148,6 @@ try {
         // Mostrar progreso cada 100 registros o en el último
         if ($importedCount % 100 === 0 || $importedCount === $totalRegistros) {
             echo "\r🔄 Progreso: $importedCount/$totalRegistros ($porcentaje%) | ";
-            echo "⏱️ $tiempoTranscurrido seg | ";
-            echo "🚀 $registrosPorSegundo reg/s | ";
-            echo "⏳ Restante: ~$tiempoRestante seg | ";
-            echo "🧉 " . ceil($importedCount / 2000) . " mate(s)";
         }
 
         // Procesamiento de datos
