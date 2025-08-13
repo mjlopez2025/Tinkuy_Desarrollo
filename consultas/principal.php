@@ -38,7 +38,7 @@ include_once("../config.php");
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="index.php">Home</a>
+                            <a class="nav-link active" aria-current="page" href="principal.php">Home</a>
                         </li>
                         <li class="nav-item dropdown nav-color">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -49,24 +49,25 @@ include_once("../config.php");
     
     <!-- Ítem con submenú -->
     <li class="dropdown-submenu">
-  <a class="dropdown-item dropdown-toggle" data-value="combinados">Docentes - Unificado</a>
+  <a class="dropdown-item dropdown-toggle">Docentes - Unificado</a>
   <ul class="dropdown-menu">
     <!-- Submenú de años (sin funcionalidad) -->
-    <li><a class="dropdown-item year-item">2011</a></li>
-    <li><a class="dropdown-item year-item">2012</a></li>
-    <li><a class="dropdown-item year-item">2013</a></li>
-    <li><a class="dropdown-item year-item">2014</a></li>
-    <li><a class="dropdown-item year-item">2015</a></li>
-    <li><a class="dropdown-item year-item">2016</a></li>
-    <li><a class="dropdown-item year-item">2017</a></li>
-    <li><a class="dropdown-item year-item">2018</a></li>
-    <li><a class="dropdown-item year-item">2019</a></li>
-    <li><a class="dropdown-item year-item">2020</a></li>
-    <li><a class="dropdown-item year-item">2021</a></li>
-    <li><a class="dropdown-item year-item">2022</a></li>
-    <li><a class="dropdown-item year-item">2023</a></li>
-    <li><a class="dropdown-item year-item">2024</a></li>
-    <li><a class="dropdown-item year-item">2025</a></li>
+    <li><a class="dropdown-item year-item" data-value="combinados">Todos los años</a></li>
+    <li><a class="dropdown-item year-item" data-value="2011">2011</a></li>
+    <li><a class="dropdown-item year-item" data-value="2012">2012</a></li>
+    <li><a class="dropdown-item year-item" data-value="2013">2013</a></li>
+    <li><a class="dropdown-item year-item" data-value="2014">2014</a></li>
+    <li><a class="dropdown-item year-item" data-value="2015">2015</a></li>
+    <li><a class="dropdown-item year-item" data-value="2016">2016</a></li>
+    <li><a class="dropdown-item year-item" data-value="2017">2017</a></li>
+    <li><a class="dropdown-item year-item" data-value="2018">2018</a></li>
+    <li><a class="dropdown-item year-item" data-value="2019">2019</a></li>
+    <li><a class="dropdown-item year-item" data-value="2020">2020</a></li>
+    <li><a class="dropdown-item year-item" data-value="2021">2021</a></li>
+    <li><a class="dropdown-item year-item" data-value="2022">2022</a></li>
+    <li><a class="dropdown-item year-item" data-value="2023">2023</a></li>
+    <li><a class="dropdown-item year-item" data-value="2024">2024</a></li>
+    <li><a class="dropdown-item year-item" data-value="2025">2025</a></li>
   </ul>
 </li>
 
@@ -386,11 +387,11 @@ document.querySelectorAll('.dropdown-item').forEach(item => {
     
     if (value === 'combinados') {
       // Ejecuta la acción de "Docentes - Unificado"
-      cargarDatos('combinados'); // reemplazalo por tu función real
+      cargarResultados('combinados'); // reemplazalo por tu función real
     } else if (value === 'guarani') {
-      cargarDatos('guarani');
+      cargarResultados('guarani');
     } else if (value === 'mapuche') {
-      cargarDatos('mapuche');
+      cargarResultados('mapuche');
     }
 
     // Evita cerrar el menú si clickeaste en un submenú sin data-value
