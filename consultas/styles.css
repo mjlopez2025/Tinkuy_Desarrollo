@@ -529,7 +529,12 @@ th {
 }
 
 .custom-navbar .dropdown-menu {
-    background-color: #34495e; /* Opcional: fondo del menú desplegable */
+    background-color: #34495e; /* Opcional: fondo del menú desplegable */    
+}
+/* Solo para el submenú de años */
+.custom-navbar .dropdown-menu .dropdown-menu {
+    max-height: 300px; /* Altura máxima antes de que aparezca scroll */
+    overflow-y: auto;  /* Scroll vertical */
 }
 
 .custom-navbar .dropdown-item {
@@ -653,18 +658,14 @@ th {
 
 /* ESTILOS ORIGINALES (sin el azul claro) */
 .year-item {
-    background-color: #f8f9fa; /* Gris claro original */
     color: #000000; /* Texto oscuro */
     padding: 8px 15px;
 }
 
-.year-item:hover {
-    background-color: #e9ecef; /* Gris un poco más oscuro al pasar el mouse */
-}
+
 
 .year-item.active {
     background-color: #2c3e50 !important; /* Azul oscuro/gris original */
-    color: white !important;
     font-weight: bold;
 }
 
