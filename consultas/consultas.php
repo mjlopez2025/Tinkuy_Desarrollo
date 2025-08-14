@@ -94,22 +94,23 @@ class ConsultasDocentes {
 }
 
 
-    public function contarDocentesCombinados($searchTerm = '', $year = '') 
-{
+    public function contarDocentesCombinados($searchTerm = '', $year = '') {
     $whereClause = '';
     $params = [];
 
+    // Filtro por búsqueda
     if (!empty($searchTerm)) {
-        $whereClause = " AND m.apellidonombre_desc ILIKE :searchTerm";
+        $whereClause .= " AND m.apellidonombre_desc ILIKE :searchTerm";
         $params[':searchTerm'] = '%' . $searchTerm . '%';
     }
 
-    if ($year !== 'all') {
+    // Filtro por año
+    if (!empty($year) && $year !== 'all') {
         $whereClause .= " AND (m.anio_id = :year OR g.anio_guarani = :year)";
         $params[':year'] = $year;
     }
 
-    // CONSULTA CORREGIDA:
+    // Consulta
     $sql = "SELECT COUNT(*) as total
             FROM docentes_mapuche AS m
             LEFT JOIN docentes_guarani AS g 
@@ -120,20 +121,18 @@ class ConsultasDocentes {
             $whereClause";
 
     $stmt = $this->conn->prepare($sql);
-    
-    if (!empty($searchTerm)) {
-        $stmt->bindValue(':searchTerm', '%' . $searchTerm . '%');
-    }
-    
-    if ($year !== 'all') {
-        $stmt->bindValue(':year', $year);
+
+    // Bind de parámetros dinámico
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
     }
 
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     return (int)$result['total'];
 }
+
 
     // ================================
     // 2. DOCENTES MAPUCHE 
