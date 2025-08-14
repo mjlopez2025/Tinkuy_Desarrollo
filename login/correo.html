@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="login.css">
+  <title>Restablecer Contraseña | Tinkuy</title>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <div class="image-side">
+        <img src="../imagenes/logo.png" alt="Logo UNDAV" class="logo-undav">
+      </div>
+      <div class="tincuy">
+        <p style="font-size: 10pt; font-weight: normal;">Tinkuy: Del quechua, "Encuentro" o "Unión armónica". <br>
+          En la tradición andina, representa la convergencia de fuerzas complementarias para crear algo superior.</p>
+      </div>
+    </div>
+    <div class="login-container">
+      <h1>Restablecer Contraseña</h1>
+      <form id="resetForm" autocomplete="off">
+        <div id="error-container" class="error-container" style="display: none;"></div>
+        
+        <div class="input-group">
+          <label for="username">Usuario</label>
+          <div class="input-with-icon">
+            <input type="text" id="username" name="username" placeholder="Ingrese su usuario" required autocomplete="off">
+            <i class="fas fa-user icon"></i>
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="email">Correo Electrónico</label>
+          <div class="input-with-icon">
+            <input type="email" id="email" name="email" placeholder="tucorreo@undav.edu.ar" required autocomplete="off">
+            <i class="fas fa-envelope icon"></i>
+          </div>
+        </div>
+        <button type="submit" class="btn-login" id="submitBtn">
+          <span class="btn-text">Enviar</span>
+        </button>
+        <div class="register-link">
+          <p>¿Tenés cuenta? <a href="login.html" class="register-anchor">Iniciar Sesion</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="footer-text">
+    <img class="logo_undav" src="../imagenes/undav.png" style="width: 35px !important; height: auto !important;">
+    v.1.0 &copy; 2025 - Desarrollado por el Área de Sistemas...
+  </p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const resetForm = document.getElementById('resetForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = submitBtn.querySelector('.btn-text');
+      const errorContainer = document.getElementById('error-container');
+
+      resetForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Limpiar errores anteriores
+        errorContainer.style.display = 'none';
+        
+        // Obtener valores del formulario
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        
+        // Validación básica
+        if (!username || !email) {
+          showError('Por favor complete todos los campos');
+          return;
+        }
+        
+        // Mostrar estado de carga
+        submitBtn.disabled = true;
+        btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        
+        try {
+          const response = await fetch('reset_request.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: username,
+              email: email
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            // Mostrar mensaje de éxito
+            showSuccess(data.message || 'Se ha enviado un correo con instrucciones para restablecer tu contraseña');
+            resetForm.reset();
+          } else {
+            showError(data.message || 'Error al procesar la solicitud');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showError('Error al conectar con el servidor');
+        } finally {
+          submitBtn.disabled = false;
+          btnText.textContent = 'Enviar';
+        }
+      });
+      
+      function showError(message) {
+        errorContainer.innerHTML = `
+          <div class="error-content">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>${message}</div>
+          </div>
+        `;
+        errorContainer.style.display = 'block';
+      }
+      
+      function showSuccess(message) {
+        errorContainer.innerHTML = `
+          <div class="success-content">
+            <i class="fas fa-check-circle"></i>
+            <div>${message}</div>
+          </div>
+        `;
+        errorContainer.style.display = 'block';
+        errorContainer.style.color = '#2ecc71';
+      }
+    });
+  </script>
+</body>
+</html>
