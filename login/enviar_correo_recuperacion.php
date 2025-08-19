@@ -13,7 +13,15 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$email = trim($_POST['email']);
+// Obtener y validar ambos campos
+$usuario = trim($_POST['usuario'] ?? '');
+$email = trim($_POST['email'] ?? '');
+
+// Validar que ambos campos estén presentes
+if (empty($usuario) || empty($email)) {
+    echo json_encode(['success' => false, 'message' => 'Debe completar ambos campos']);
+    exit;
+}
 
 // Validar email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -21,14 +29,18 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-// Buscar usuario
+// Buscar usuario que coincida con AMBOS campos
 try {
-    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = :email");
-    $stmt->execute([':email' => $email]);
-    $usuario = $stmt->fetch();
+    // CAMBIADO: usar 'usuario' en lugar de 'username'
+    $stmt = $conn->prepare("SELECT id, usuario, email FROM usuarios WHERE usuario = :usuario AND email = :email");
+    $stmt->execute([
+        ':usuario' => $usuario,
+        ':email' => $email
+    ]);
+    $usuario_data = $stmt->fetch();
 
-    if (!$usuario) {
-        echo json_encode(['success' => false, 'message' => 'No existe un usuario con ese correo.']);
+    if (!$usuario_data) {
+        echo json_encode(['success' => false, 'message' => 'El nombre de usuario y correo electrónico no coinciden']);
         exit;
     }
 
@@ -43,7 +55,7 @@ try {
     $stmt->execute([
         ':token' => $token,
         ':expira' => $expira,
-        ':id' => $usuario['id']
+        ':id' => $usuario_data['id']
     ]);
 
     // Enviar email
@@ -52,8 +64,8 @@ try {
     $mail->isSMTP();
     $mail->Host       = 'smtp.gmail.com';
     $mail->SMTPAuth   = true;
-    $mail->Username   = 'maxijlopez2101@gmail.com';
-    $mail->Password   = 'oqjo qnnw lmra xtnu';
+    $mail->Username   = 'sudocu@undav.edu.ar';
+    $mail->Password   = 'cxro vfjw xnni lovd';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
     $mail->Port       = 465;
 
@@ -63,9 +75,11 @@ try {
     $mail->isHTML(true);
     $mail->Subject = "Restablecer contraseña - Tinkuy";
     $enlace = "http://localhost:8000/login/restablecer_contrasena.php?token=" . $token;
+    
+    // CAMBIADO: usar 'usuario' en lugar de 'username'
     $mail->Body = "
         <h2>Restablecer contraseña</h2>
-        <p>Hola,</p>
+        <p>Hola " . htmlspecialchars($usuario_data['usuario']) . ",</p>
         <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
         <p><a href='$enlace' style='background-color: #3085d6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Restablecer contraseña</a></p>
         <p>O copia este enlace en tu navegador:<br>$enlace</p>
@@ -84,9 +98,10 @@ try {
 
 } catch (Exception $e) {
     // ERROR - Devolver JSON con el error
+    error_log("Error en recuperación: " . $e->getMessage());
     echo json_encode([
         'success' => false, 
-        'message' => 'Error al enviar el correo: ' . $e->getMessage()
+        'message' => 'Error al procesar la solicitud. Por favor, intente nuevamente.'
     ]);
 }
 

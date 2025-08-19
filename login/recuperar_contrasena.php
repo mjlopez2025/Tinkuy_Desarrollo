@@ -25,10 +25,19 @@
     <div class="login-container recuperar-card">
       <h1>¿Olvidaste tu contraseña?</h1>
       <p class="sub">
-        Ingresá tu correo electrónico y te enviaremos un enlace para restablecerla.
+        Ingresá tu nombre de usuario y correo electrónico para enviarte un enlace de recuperación.
       </p>
 
       <form id="recuperarForm" class="form-recuperar" autocomplete="off">
+        <!-- NUEVO CAMPO: USUARIO -->
+        <div class="input-group">
+          <label for="usuario">Nombre de Usuario</label>
+          <div class="input-with-icon">
+            <input type="text" id="usuario" name="usuario" placeholder="Tu nombre de usuario" required autocomplete="off">
+            <i class="fas fa-user icon"></i>
+          </div>
+        </div>
+
         <div class="input-group">
           <label for="email">Correo Electrónico</label>
           <div class="input-with-icon">
@@ -70,11 +79,13 @@
       btn.disabled = true;
       btnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
       
-      // Obtener el email
+      // Obtener los valores
+      const usuario = document.getElementById('usuario').value;
       const email = document.getElementById('email').value;
       
       // Crear FormData para enviar
       const formData = new FormData();
+      formData.append('usuario', usuario);
       formData.append('email', email);
       
       // Enviar datos con fetch
@@ -104,7 +115,7 @@
           });
           form.reset(); // Limpiar el formulario después del éxito
         } else {
-          // Error: correo no existe u otro error
+          // Error: credenciales no coinciden u otro error
           let errorMessage = data.message || 'Ocurrió un error al enviar el correo.';
           
           Swal.fire({
@@ -121,7 +132,7 @@
         Swal.fire({
           icon: 'error',
           title: 'Error de conexión',
-          text: 'El correo se envió pero no se pudo verificar la respuesta del servidor. Por favor, revisa tu bandeja de entrada.',
+          text: 'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
           confirmButtonColor: '#d33',
           confirmButtonText: 'Entendido'
         });

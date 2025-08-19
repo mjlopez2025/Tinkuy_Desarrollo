@@ -6,7 +6,8 @@ if (!isset($_GET['token'])) {
 }
 
 $token = $_GET['token'];
-$stmt = $conn->prepare("SELECT id, reset_expires FROM usuarios WHERE reset_token = :token");
+// CAMBIÉ LA CONSULTA: Ahora también selecciona el nombre de usuario
+$stmt = $conn->prepare("SELECT id, reset_expires, usuario FROM usuarios WHERE reset_token = :token");
 $stmt->execute([':token' => $token]);
 $usuario = $stmt->fetch();
 
@@ -44,6 +45,16 @@ if (!$usuario || strtotime($usuario['reset_expires']) < time()) {
       <form id="resetForm" autocomplete="off">
         <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
         
+        <!-- NUEVO CAMPO: Nombre de usuario (solo lectura) -->
+        <div class="input-group">
+          <label for="username">Nombre de usuario</label>
+          <div class="input-with-icon">
+            <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($usuario['usuario']); ?>" readonly autocomplete="off">
+            <i class="fas fa-user icon"></i>
+          </div>
+          <small style="color: #666; font-size: 12px;">Este campo no se puede modificar</small>
+        </div>
+
         <div class="input-group">
           <label for="password">Nueva contraseña</label>
           <div class="input-with-icon">
@@ -263,5 +274,18 @@ if (!$usuario || strtotime($usuario['reset_expires']) < time()) {
       }
     });
   </script>
+
+  <style>
+    /* Estilo adicional para el campo de solo lectura */
+    #username {
+      background-color: #f8f9fa;
+      cursor: not-allowed;
+    }
+    
+    #username:focus {
+      border-color: #ddd;
+      box-shadow: none;
+    }
+  </style>
 </body>
 </html>
