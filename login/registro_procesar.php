@@ -127,7 +127,3 @@ try {
 }
 
 echo json_encode($response);
-
-
-// Restablecer contraseña
-
