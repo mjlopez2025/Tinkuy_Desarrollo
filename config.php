@@ -46,9 +46,5 @@ $conn_wichi = new PDO(
     //Produccion: http://172.16.1.58/Tinkuy/consultas/consultas.php
     // Desarrollo: http://localhost:8000/Tinkuy/consultas/consultas.php
 
-<<<<<<< HEAD
 define('BASE_URL', 'http://172.16.1.58/Tinkuy/consultas/consultas.php');
-=======
-define('BASE_URL', 'http://localhost:8000/consultas/consultas.php');
->>>>>>> 7e82a5d232482c6a1a92d1408b3c629543398fbb
 
