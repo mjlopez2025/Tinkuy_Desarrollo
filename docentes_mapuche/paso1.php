@@ -33,18 +33,29 @@ try {
     // 2. Crear tabla docentes_mapuche
     $createTableSQL = "
     CREATE TABLE IF NOT EXISTS docentes_mapuche (
-        id SERIAL PRIMARY KEY,
-        apellidonombre_desc VARCHAR(255),
-        nro_documento VARCHAR(255),
-        categoria_desc VARCHAR(100),
-        nro_cargo INTEGER,
-        dedicacion_desc VARCHAR(50),
-        estadodelcargo_desc VARCHAR(100),
-        dependenciadesign_desc VARCHAR(255),
-        anio_id INTEGER,
-        mes_desc VARCHAR(20),
-        persona_id INTEGER
-    );
+    id SERIAL PRIMARY KEY,
+    nro_legaj VARCHAR(50),
+    apellidonombre_desc VARCHAR(100),
+    tipo_docum VARCHAR(20),
+    nro_docum VARCHAR(50),
+    nro_cargo INTEGER,
+    codc_categ VARCHAR(20),
+    desc_categ VARCHAR(100),
+    codc_carac VARCHAR(20),
+    desc_grupo VARCHAR(100),
+    fec_alta DATE,
+    fec_baja DATE,
+    nrovarlicencia VARCHAR(50),
+    fec_hasta DATE,
+    codc_uacad VARCHAR(50),
+    desc_item VARCHAR(100),
+    coddependesemp VARCHAR(50),
+    descdependesemp VARCHAR(255),
+    tipo_norma VARCHAR(50),
+    tipo_emite VARCHAR(50),
+    fec_norma DATE,
+    nro_norma VARCHAR(100)
+);
     ";
     
     echo "⚙️ Ejecutando sentencia CREATE TABLE...\n";

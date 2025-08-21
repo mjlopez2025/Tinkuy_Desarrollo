@@ -74,7 +74,7 @@ try {
 
     $mail->isHTML(true);
     $mail->Subject = "Restablecer contraseña - Tinkuy";
-    $enlace = "http://localhost:8000/login/restablecer_contrasena.php?token=" . $token;
+    $enlace = "http://172.16.1.58/Tinkuy/login/restablecer_contrasena.php?token=" . $token;
     
     // CAMBIADO: usar 'usuario' en lugar de 'username'
     $mail->Body = "
