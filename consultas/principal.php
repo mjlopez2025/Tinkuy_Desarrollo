@@ -14,6 +14,8 @@ include_once("../config.php");
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="styles.css" />
 </head>
@@ -44,34 +46,51 @@ include_once("../config.php");
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">Docentes</a>
                             <ul class="dropdown-menu">
-    <li><a class="dropdown-item" data-value="guarani">Docentes con Asignación Aulica</a></li>
-    <li><a class="dropdown-item" data-value="mapuche">Docentes con Designación</a></li>
-    
-    <!-- Ítem con submenú -->
-    <li class="dropdown-submenu">
-    <a class="dropdown-item dropdown-toggle">Docentes - Unificado</a>
-    <ul class="dropdown-menu">
-    <!-- Submenú de años (sin funcionalidad) -->
-    <li><a class="dropdown-item year-item active" data-value="all" data-type="combinados">Todos los años</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2011" data-type="combinados">2011</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2012" data-type="combinados">2012</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2013" data-type="combinados">2013</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2014" data-type="combinados">2014</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2015" data-type="combinados">2015</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2016" data-type="combinados">2016</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2017" data-type="combinados">2017</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2018" data-type="combinados">2018</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2019" data-type="combinados">2019</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2020" data-type="combinados">2020</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2021" data-type="combinados">2021</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2022" data-type="combinados">2022</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2023" data-type="combinados">2023</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2024" data-type="combinados">2024</a></li>
-    <li><a class="dropdown-item year-item active" data-value="2025" data-type="combinados">2025</a></li>
-    </ul>
-</li>
+                                <li><a class="dropdown-item" data-value="guarani">Docentes con Asignación Aulica</a>
+                                </li>
+                                <li><a class="dropdown-item" data-value="mapuche">Docentes con Designación</a></li>
 
-</ul>
+                                <!-- Ítem con submenú -->
+                                <li class="dropdown-submenu">
+                                    <a class="dropdown-item dropdown-toggle">Docentes - Unificado</a>
+                                    <ul class="dropdown-menu">
+                                        <!-- Submenú de años (sin funcionalidad) -->
+                                        <li><a class="dropdown-item year-item active" data-value="all"
+                                                data-type="combinados">Todos los años</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2011"
+                                                data-type="combinados">2011</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2012"
+                                                data-type="combinados">2012</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2013"
+                                                data-type="combinados">2013</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2014"
+                                                data-type="combinados">2014</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2015"
+                                                data-type="combinados">2015</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2016"
+                                                data-type="combinados">2016</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2017"
+                                                data-type="combinados">2017</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2018"
+                                                data-type="combinados">2018</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2019"
+                                                data-type="combinados">2019</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2020"
+                                                data-type="combinados">2020</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2021"
+                                                data-type="combinados">2021</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2022"
+                                                data-type="combinados">2022</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2023"
+                                                data-type="combinados">2023</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2024"
+                                                data-type="combinados">2024</a></li>
+                                        <li><a class="dropdown-item year-item active" data-value="2025"
+                                                data-type="combinados">2025</a></li>
+                                    </ul>
+                                </li>
+
+                            </ul>
 
                         </li>
                     </ul>
@@ -79,7 +98,8 @@ include_once("../config.php");
                     <!-- Contenedor del filtro -->
                     <div class="filter-container">
                         <label for="filterInput" class="filter-label">Filtrar:</label>
-                        <input type="text" id="filterInput" class="form-control filter-input" placeholder="Nombre/Apellido" />
+                        <input type="text" id="filterInput" class="form-control filter-input"
+                            placeholder="Nombre/Apellido" />
                         <button type="button" id="filterBtn" class="btn btn-outline-primary">
                             <i class="fas fa-search"></i>
                         </button>
@@ -116,7 +136,7 @@ include_once("../config.php");
     <!-- jsPDF y autoTable para PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
+
     <script>
     const baseURL = "<?php echo BASE_URL; ?>";
     let currentPage = 1;
@@ -153,7 +173,8 @@ include_once("../config.php");
             const data = await response.json();
             if (!data.success) throw new Error(data.error || 'Error desconocido');
 
-            document.getElementById('paginationText').textContent = `Página ${data.pagination.current_page} de ${data.pagination.total_pages}`;
+            document.getElementById('paginationText').textContent =
+                `Página ${data.pagination.current_page} de ${data.pagination.total_pages}`;
             let html = '';
 
             if (currentSearchTerm) {
@@ -219,10 +240,14 @@ include_once("../config.php");
             }
 
             // Paginación
-            const { current_page, total_pages } = data.pagination;
+            const {
+                current_page,
+                total_pages
+            } = data.pagination;
             let pagHtml = '<nav aria-label="Page navigation"><ul class="pagination justify-content-center">';
             if (current_page > 1) {
-                pagHtml += `<li class="page-item"><a class="page-link" href="#" onclick="irPagina(${current_page - 1}); return false;">&laquo;</a></li>`;
+                pagHtml +=
+                    `<li class="page-item"><a class="page-link" href="#" onclick="irPagina(${current_page - 1}); return false;">&laquo;</a></li>`;
             } else {
                 pagHtml += `<li class="page-item disabled"><span class="page-link">&laquo;</span></li>`;
             }
@@ -243,7 +268,8 @@ include_once("../config.php");
             }
 
             if (current_page < total_pages) {
-                pagHtml += `<li class="page-item"><a class="page-link" href="#" onclick="irPagina(${current_page + 1}); return false;">&raquo;</a></li>`;
+                pagHtml +=
+                    `<li class="page-item"><a class="page-link" href="#" onclick="irPagina(${current_page + 1}); return false;">&raquo;</a></li>`;
             } else {
                 pagHtml += `<li class="page-item disabled"><span class="page-link">&raquo;</span></li>`;
             }
@@ -260,16 +286,18 @@ include_once("../config.php");
     function irPagina(pagina) {
         currentPage = pagina;
         cargarResultados();
-        document.querySelector('.query-panel').scrollIntoView({ behavior: 'smooth' });
+        document.querySelector('.query-panel').scrollIntoView({
+            behavior: 'smooth'
+        });
     }
 
     async function obtenerTodosLosDatos() {
         try {
             const response = await fetch(
-                `${baseURL}?action=getData&type=${currentQueryType}&search=${encodeURIComponent(currentSearchTerm)}&year=${currentYear}&export=true`
+                `${baseURL}?action=getData&type=${currentQueryType}&search=${encodeURIComponent(currentSearchTerm)}&year=${currentYear}&perPage=100000`
             );
             const data = await response.json();
-            return data.resultados || data.data || [];
+            return data.data || [];
         } catch (error) {
             console.error("Error al obtener todos los datos:", error);
             return [];
@@ -298,39 +326,151 @@ include_once("../config.php");
             return;
         }
 
-        const jsPDF = window.jspdf?.jsPDF || window.jspdf;
+        const {
+            jsPDF
+        } = window.jspdf;
         const doc = new jsPDF({
             orientation: "landscape",
-            unit: "pt",
+            unit: "mm",
             format: "a4"
         });
 
-        const fecha = new Date().toLocaleString('es-AR');
-        doc.setFontSize(14);
-        doc.text("Listado de Docentes - Completo", 40, 40);
-        doc.setFontSize(10);
-        doc.text(`Exportado el ${fecha}`, 40, 60);
+        // Configuración de estilos
+        const primaryColor = [41, 128, 185]; // Azul profesional
+        const secondaryColor = [240, 240, 240]; // Gris claro
+        const margin = 10;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const availableWidth = pageWidth - (margin * 2);
 
+        // Encabezado profesional
+        doc.setFillColor(...primaryColor);
+        doc.rect(0, 0, pageWidth, 20, 'F');
+
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("LISTADO COMPLETO DE DOCENTES", pageWidth / 2, 12, {
+            align: "center"
+        });
+
+        doc.setFontSize(10);
+        doc.text(`Exportado el: ${new Date().toLocaleString('es-AR')}`, pageWidth / 2, 18, {
+            align: "center"
+        });
+
+        // Información de filtros aplicados
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.setFont("helvetica", "normal");
+
+        let filterInfo = `Tipo: ${currentQueryType.toUpperCase()}`;
+        if (currentYear && currentYear !== 'all') {
+            filterInfo += ` | Año: ${currentYear}`;
+        }
+        if (currentSearchTerm) {
+            filterInfo += ` | Búsqueda: "${currentSearchTerm}"`;
+        }
+
+        doc.text(filterInfo, margin, 30);
+        doc.text(`Total de registros: ${datos.length}`, pageWidth - margin, 30, {
+            align: "right"
+        });
+
+        // Preparar datos para la tabla
         const headers = [Object.keys(datos[0])];
         const rows = datos.map(row => Object.values(row));
 
+        const addWatermark = () => {
+            doc.setFontSize(60);
+            doc.setTextColor(240, 240, 240);
+            doc.setFont("helvetica", "bold");
+            doc.text("CONFIDENCIAL", pageWidth / 2, pageHeight / 2, {
+                align: "center",
+                angle: 45,
+                opacity: 0.1
+            });
+            doc.setTextColor(50, 50, 50);
+        };
+
+        addWatermark();
+
+        // Configuración de la tabla profesional
         doc.autoTable({
+            startY: 35,
             head: headers,
             body: rows,
-            startY: 80,
-            margin: { top: 40, left: 40, right: 40 },
-            styles: { fontSize: 9, cellPadding: 4 },
-            headStyles: { fillColor: [41, 128, 185], textColor: 255, halign: 'center', fontStyle: 'bold' },
-            alternateRowStyles: { fillColor: [240, 240, 240] },
-            theme: 'striped'
+            margin: {
+                top: 35,
+                left: margin,
+                right: margin
+            },
+            styles: {
+                fontSize: 7,
+                cellPadding: 1,
+                lineColor: [200, 200, 200],
+                lineWidth: 0.1,
+                textColor: [50, 50, 50]
+            },
+            headStyles: {
+                fillColor: primaryColor,
+                textColor: 255,
+                fontStyle: 'bold',
+                fontSize: 8,
+                halign: 'center',
+                valign: 'middle'
+            },
+            alternateRowStyles: {
+                fillColor: secondaryColor
+            },
+            theme: 'grid',
+            tableLineColor: [150, 150, 150],
+            tableLineWidth: 0.2,
+            columnStyles: {
+                // Ajustes específicos para columnas comunes
+                0: {
+                    cellWidth: 'auto',
+                    halign: 'left'
+                },
+                1: {
+                    cellWidth: 'auto',
+                    halign: 'left'
+                },
+                2: {
+                    cellWidth: 'auto',
+                    halign: 'center'
+                },
+                3: {
+                    cellWidth: 'auto',
+                    halign: 'center'
+                }
+            },
+            didDrawPage: function(data) {
+                // Pie de página profesional
+                doc.setFontSize(8);
+                doc.setTextColor(100, 100, 100);
+                doc.setFont("helvetica", "italic");
+                doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageWidth / 2, pageHeight - 5, {
+                    align: "center"
+                });
+
+                // Línea decorativa
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, pageHeight - 10, pageWidth - margin, pageHeight - 10);
+            }
         });
 
-        doc.save("resultados.pdf");
+        // Guardar con nombre descriptivo
+        const fileName =
+            `docentes_${currentQueryType}_${currentYear || 'todos'}_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(fileName);
     }
 
     async function secureLogout() {
         try {
-            await fetch('logout.php', { method: 'POST' });
+            await fetch('logout.php', {
+                method: 'POST'
+            });
             await Swal.fire({
                 title: '¡Sesión cerrada!',
                 text: 'Vuelve pronto 😊',
@@ -345,67 +485,67 @@ include_once("../config.php");
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('logoutBtn').addEventListener('click', secureLogout);
         document.getElementById('refreshBtn').addEventListener('click', () => {
             currentPage = 1;
             cargarResultados();
         });
-        document.getElementById('filterBtn').addEventListener('click', function () {
+        document.getElementById('filterBtn').addEventListener('click', function() {
             currentSearchTerm = document.getElementById('filterInput').value.trim();
             currentPage = 1;
             cargarResultados();
         });
-        document.getElementById('filterInput').addEventListener('keyup', function (e) {
+        document.getElementById('filterInput').addEventListener('keyup', function(e) {
             if (e.key === 'Enter') {
                 currentSearchTerm = this.value.trim();
                 currentPage = 1;
                 cargarResultados();
             }
         });
-        
+
         // Manejo del menú principal
-        // Manejo del menú principal (solo items sin year-item)
-document.querySelectorAll('.dropdown-item:not(.year-item)').forEach(item => {
-    item.addEventListener('click', function (e) {
-        e.preventDefault();
-        currentQueryType = this.dataset.value;
-        currentSelectionText = this.textContent;
-        currentPage = 1;
-        currentSearchTerm = '';
-        currentYear = 'all';
-        document.getElementById('filterInput').value = '';
-        cargarResultados();
-    });
-});
+        document.querySelectorAll('.dropdown-item:not(.year-item)').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                currentQueryType = this.dataset.value;
+                currentSelectionText = this.textContent;
+                currentPage = 1;
+                currentSearchTerm = '';
+                currentYear = 'all';
+                document.getElementById('filterInput').value = '';
+                cargarResultados();
+            });
+        });
 
 
         // Manejo del submenú de años
-document.querySelectorAll('.year-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // 1. Actualizar parámetros
-        currentQueryType = 'combinados'; // ← FIJO para este submenú
-        currentYear = this.dataset.value === 'combinados' ? 'all' : this.dataset.value;
-        currentSelectionText = `Docentes - Unificado ${currentYear === 'all' ? '' : '('+currentYear+')'}`;
-        currentPage = 1;
+        document.querySelectorAll('.year-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
 
-        // 2. Actualizar estilos
-        document.querySelectorAll('.year-item').forEach(yearItem => {
-            yearItem.classList.remove('active');
+                // 1. Actualizar parámetros
+                currentQueryType = 'combinados'; // ← FIJO para este submenú
+                currentYear = this.dataset.value === 'combinados' ? 'all' : this.dataset.value;
+                currentSelectionText =
+                    `Docentes - Unificado ${currentYear === 'all' ? '' : '('+currentYear+')'}`;
+                currentPage = 1;
+
+                // 2. Actualizar estilos
+                document.querySelectorAll('.year-item').forEach(yearItem => {
+                    yearItem.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // 3. Cargar resultados
+                cargarResultados();
+            });
         });
-        this.classList.add('active');
-        
-        // 3. Cargar resultados
-        cargarResultados();
-    });
-});
 
         document.getElementById('excelBtn').addEventListener('click', exportarAExcel);
         document.getElementById('pdfBtn').addEventListener('click', exportarAPDF);
     });
-</script>
+    </script>
 </body>
 
 </html>
