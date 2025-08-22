@@ -96,6 +96,7 @@ include_once("../config.php");
 
         <main class="app-main">
             <div id="resultsContainer" class="results-container"></div>
+            <div id="logoFondo" class="logo-fondo"></div>
             <div id="paginationContainer" class="pagination-container"></div>
         </main>
 

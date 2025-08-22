@@ -768,3 +768,36 @@ th {
         margin: 0;
         padding: 0px;
     }
+
+
+     /* Estilos para el logo de fondo */
+        .logo-fondo {
+            position: absolute;
+            top: 280px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70%); /* Ajusté la altura para compensar */ 
+            background-image: url('../imagenes/logo.png'); /* Ruta a tu logo */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 35%; /* Ajusta el tamaño según necesites */
+             /* Hacemos el logo semi-transparente */
+             opacity: 0.7;
+            z-index: 1;
+            pointer-events: none; /* Permite hacer clic a través del logo */
+        }
+        
+        .results-container {
+            position: relative; /* Necesario para posicionar el logo de fondo */
+            min-height: 300px; /* Altura mínima para que el logo sea visible */
+        }
+        
+        .table-scroll-container {
+            position: relative;
+            z-index: 2; /* Aseguramos que la tabla esté por encima del logo */
+        }
+        
+        .loading, .error, .alert {
+            position: relative;
+            z-index: 2; /* Aseguramos que estos elementos estén por encima del logo */
+        }
