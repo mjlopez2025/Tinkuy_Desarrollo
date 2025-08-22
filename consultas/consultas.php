@@ -17,98 +17,148 @@ class ConsultasDocentes {
     }
 
     // ================================
-    // 1. DOCENTES COMBINADOS 
-    // ================================
-    public function docentesCombinados($page = 1, $perPage = 50, $searchTerm = '', $year = null) {
-        $offset = ($page - 1) * $perPage;
-        $joinCondition = "ON m.nro_docum::VARCHAR = g.num_doc_guarani";
-        $whereConditions = [];
-        $params = [];
+// 1. DOCENTES COMBINADOS 
+// ================================
+public function docentesCombinados($page = 1, $perPage = 50, $searchTerm = '', $year = null) {
+    $offset = ($page - 1) * $perPage;
+    $joinCondition = "ON m.nro_docum::VARCHAR = g.num_doc_guarani";
+    $whereConditions = [];
+    $params = [];
 
-        // Búsqueda por nombre
-        if (!empty($searchTerm)) {
-            $whereConditions[] = "m.apellidonombre_desc ILIKE :searchTerm";
-            $params[':searchTerm'] = '%' . $searchTerm . '%';
-        }
-
-        // Filtro por año
-        if ($year !== null && $year !== '' && $year !== 'all') {
-            $whereConditions[] = "g.anio_guarani = :year";
-            $params[':year'] = (int)$year;
-        }
-
-        $additionalWhere = '';
-        if (!empty($whereConditions)) {
-            $additionalWhere = 'WHERE ' . implode(' AND ', $whereConditions);
-        }
-
-        $sql = "SELECT 
-            m.nro_legaj AS \"Nro Legajo (M)\",
-            m.apellidonombre_desc AS \"Apellido y Nombre (M)\",
-            m.tipo_docum AS \"Tipo Doc. (M)\",
-            m.nro_docum AS \"Nro Doc. (M)\",
-            m.nro_cargo::TEXT AS \"Cargo (M)\",
-            m.codc_categ AS \"Cod. Categoría (M)\",
-            m.desc_categ AS \"Desc. Categoría (M)\",
-            m.codc_carac AS \"Cod. Carácter (M)\",
-            m.desc_grupo AS \"Desc. Carácter (M)\",
-            m.fec_alta::TEXT AS \"Fecha Alta (M)\",
-            m.fec_baja::TEXT AS \"Fecha Baja (M)\",
-            m.nrovarlicencia AS \"Nro Var Licencia (M)\",
-            m.fec_hasta::TEXT AS \"Fecha Hasta (M)\",
-            m.codc_uacad AS \"Cod. UA. (M)\",
-            m.desc_item AS \"Desc. UA. (M)\",
-            m.coddependesemp AS \"Cod. Depen (M)\",
-            m.descdependesemp AS \"Desc. Depen (M)\",
-            m.tipo_norma AS \"Tipo Norma (M)\",
-            m.tipo_emite AS \"Tipo Emite (M)\",
-            m.fec_norma::TEXT AS \"Fecha Norma (M)\",
-            m.nro_norma AS \"Nro Norma (M)\",
-            g.responsabilidad_academica_guarani AS \"Resp Acad (G)\",
-            g.propuesta_formativa_guarani AS \"Propuesta (G)\", 
-            g.comision_guarani AS \"Com (G)\",
-            g.anio_guarani::TEXT AS \"Año (G)\",
-            g.periodo_guarani AS \"Período (G)\",
-            g.actividad_guarani AS \"Actividad (G)\",
-            g.cursados_guarani AS \"Est (G)\"
-        FROM docentes_mapuche AS m
-        INNER JOIN docentes_guarani AS g 
-            $joinCondition
-        $additionalWhere
-        GROUP BY
-            m.nro_legaj, m.apellidonombre_desc, m.tipo_docum, m.nro_docum, m.nro_cargo,
-            m.codc_categ, m.desc_categ, m.codc_carac, m.desc_grupo, m.fec_alta,
-            m.fec_baja, m.nrovarlicencia, m.fec_hasta, m.codc_uacad, m.desc_item,
-            m.coddependesemp, m.descdependesemp, m.tipo_norma, m.tipo_emite, m.fec_norma,
-            m.nro_norma, g.responsabilidad_academica_guarani,
-            g.propuesta_formativa_guarani, g.comision_guarani, g.anio_guarani,
-            g.periodo_guarani, g.actividad_guarani, g.cursados_guarani
-        ORDER BY m.apellidonombre_desc";
-
-        // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN ($perPage > 0)
-        if ($perPage > 0) {
-            $sql .= " LIMIT :limit OFFSET :offset";
-        }
-
-        $stmt = $this->conn->prepare($sql);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-        }
-        
-        // ✅ SOLO BINDEAR LIMIT/OFFSET SI NO ES EXPORTACIÓN
-        if ($perPage > 0) {
-            $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
-        }
-
-        $stmt->execute();
-
-        return [
-            'data'  => $stmt->fetchAll(PDO::FETCH_ASSOC),
-            'total' => $this->contarDocentesCombinados($searchTerm, $year)
-        ];
+    // Búsqueda por nombre
+    if (!empty($searchTerm)) {
+        $whereConditions[] = "m.apellidonombre_desc ILIKE :searchTerm";
+        $params[':searchTerm'] = '%' . $searchTerm . '%';
     }
+
+    // Filtro por año
+    if ($year !== null && $year !== '' && $year !== 'all') {
+        $whereConditions[] = "g.anio_guarani = :year";
+        $params[':year'] = (int)$year;
+    }
+
+    $additionalWhere = '';
+    if (!empty($whereConditions)) {
+        $additionalWhere = 'WHERE ' . implode(' AND ', $whereConditions);
+    }
+
+    $sql = "SELECT DISTINCT ON (
+        m.nro_legaj, 
+        m.apellidonombre_desc, 
+        m.tipo_docum, 
+        m.nro_docum, 
+        m.nro_cargo,
+        m.codc_categ, 
+        m.desc_categ, 
+        m.codc_carac, 
+        m.desc_grupo, 
+        m.fec_alta,
+        m.fec_baja, 
+        m.nrovarlicencia, 
+        m.fec_hasta, 
+        m.codc_uacad, 
+        m.desc_item,
+        m.coddependesemp, 
+        m.descdependesemp, 
+        m.tipo_norma, 
+        m.tipo_emite, 
+        m.fec_norma,
+        m.nro_norma, 
+        g.responsabilidad_academica_guarani,
+        g.propuesta_formativa_guarani, 
+        g.comision_guarani, 
+        g.anio_guarani,
+        g.periodo_guarani, 
+        g.actividad_guarani, 
+        g.cursados_guarani
+    )
+    m.nro_legaj AS \"Nro Legajo (M)\",
+    m.apellidonombre_desc AS \"Apellido y Nombre (M)\",
+    m.tipo_docum AS \"Tipo Doc. (M)\",
+    m.nro_docum AS \"Nro Doc. (M)\",
+    m.nro_cargo::TEXT AS \"Cargo (M)\",
+    m.codc_categ AS \"Cod. Categoría (M)\",
+    m.desc_categ AS \"Desc. Categoría (M)\",
+    m.codc_carac AS \"Cod. Carácter (M)\",
+    m.desc_grupo AS \"Desc. Carácter (M)\",
+    m.fec_alta::TEXT AS \"Fecha Alta (M)\",
+    m.fec_baja::TEXT AS \"Fecha Baja (M)\",
+    m.nrovarlicencia AS \"Nro Var Licencia (M)\",
+    m.fec_hasta::TEXT AS \"Fecha Hasta (M)\",
+    m.codc_uacad AS \"Cod. UA. (M)\",
+    m.desc_item AS \"Desc. UA. (M)\",
+    m.coddependesemp AS \"Cod. Depen (M)\",
+    m.descdependesemp AS \"Desc. Depen (M)\",
+    m.tipo_norma AS \"Tipo Norma (M)\",
+    m.tipo_emite AS \"Tipo Emite (M)\",
+    m.fec_norma::TEXT AS \"Fecha Norma (M)\",
+    m.nro_norma AS \"Nro Norma (M)\",
+    g.responsabilidad_academica_guarani AS \"Resp Acad (G)\",
+    g.propuesta_formativa_guarani AS \"Propuesta (G)\", 
+    g.comision_guarani AS \"Com (G)\",
+    g.anio_guarani::TEXT AS \"Año (G)\",
+    g.periodo_guarani AS \"Período (G)\",
+    g.actividad_guarani AS \"Actividad (G)\",
+    g.cursados_guarani AS \"Est (G)\"
+    FROM docentes_mapuche AS m
+    INNER JOIN docentes_guarani AS g 
+        $joinCondition
+    $additionalWhere
+    ORDER BY 
+        m.nro_legaj, 
+        m.apellidonombre_desc, 
+        m.tipo_docum, 
+        m.nro_docum, 
+        m.nro_cargo,
+        m.codc_categ, 
+        m.desc_categ, 
+        m.codc_carac, 
+        m.desc_grupo, 
+        m.fec_alta,
+        m.fec_baja, 
+        m.nrovarlicencia, 
+        m.fec_hasta, 
+        m.codc_uacad, 
+        m.desc_item,
+        m.coddependesemp, 
+        m.descdependesemp, 
+        m.tipo_norma, 
+        m.tipo_emite, 
+        m.fec_norma,
+        m.nro_norma, 
+        g.responsabilidad_academica_guarani,
+        g.propuesta_formativa_guarani, 
+        g.comision_guarani, 
+        g.anio_guarani,
+        g.periodo_guarani, 
+        g.actividad_guarani, 
+        g.cursados_guarani,
+        m.apellidonombre_desc";
+
+    // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN ($perPage > 0)
+    if ($perPage > 0) {
+        $sql .= " LIMIT :limit OFFSET :offset";
+    }
+
+    $stmt = $this->conn->prepare($sql);
+
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+    }
+    
+    // ✅ SOLO BINDEAR LIMIT/OFFSET SI NO ES EXPORTACIÓN
+    if ($perPage > 0) {
+        $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+    }
+
+    $stmt->execute();
+
+    return [
+        'data'  => $stmt->fetchAll(PDO::FETCH_ASSOC),
+        'total' => $this->contarDocentesCombinados($searchTerm, $year)
+    ];
+}
 
     public function contarDocentesCombinados($searchTerm = '', $year = null) {
         $joinCondition = "ON m.nro_docum::VARCHAR = g.num_doc_guarani";
@@ -165,188 +215,70 @@ class ConsultasDocentes {
     // 2. DOCENTES MAPUCHE 
     // ================================
     public function obtenerDocentesMapuche($page = 1, $perPage = 50, $searchTerm = '', $year = null) {
-        $offset = ($page - 1) * $perPage;
-        $whereClause = '';
-        $params = [];
-        $conditions = [];
-        
-        if (!empty($searchTerm)) {
-            $conditions[] = "apellidonombre_desc ILIKE :searchTerm";
-            $params[':searchTerm'] = '%' . $searchTerm . '%';
-        }
-        
-        if ($year !== null && $year !== 'all') {
-            $conditions[] = "anio_id = :year";
-            $params[':year'] = $year;
-        }
-        
-        if (!empty($conditions)) {
-            $whereClause = " WHERE " . implode(" AND ", $conditions);
-        }
-
-        $sql = "SELECT 
-            DISTINCT ON (
-                apellidonombre_desc, 
-                nro_docum,
-                desc_categ,
-                nro_cargo
-            )
-            COALESCE(nro_legaj, 'Sin información') AS \"Nro Legajo\",
-            COALESCE(apellidonombre_desc, 'Sin información') AS \"Apellido y Nombre\",
-            COALESCE(tipo_docum, 'Sin información') AS \"Tipo Doc.\",
-            COALESCE(nro_docum, 'Sin información') AS \"Nro Doc.\",
-            COALESCE(nro_cargo::TEXT, 'Sin información') AS \"Cargo\",
-            COALESCE(codc_categ, 'Sin información') AS \"Cod. Categoría\",
-            COALESCE(desc_categ, 'Sin información') AS \"Desc. Categoría\",
-            COALESCE(codc_carac, 'Sin información') AS \"Cod. Carácter\",
-            COALESCE(desc_grupo, 'Sin información') AS \"Desc. Carácter\",
-            COALESCE(fec_alta::TEXT, 'Sin información') AS \"Fecha Alta\",
-            COALESCE(fec_baja::TEXT, 'Sin información') AS \"Fecha Baja\",
-            COALESCE(nrovarlicencia, 'Sin información') AS \"Nro Var Licencia\",
-            COALESCE(fec_hasta::TEXT, 'Sin información') AS \"Fecha Hasta\",
-            COALESCE(codc_uacad, 'Sin información') AS \"Cod. Unidad Acad.\",
-            COALESCE(desc_item, 'Sin información') AS \"Desc. Unidad Acad.\",
-            COALESCE(coddependesemp, 'Sin información') AS \"Cod. Dependencia Semp\",
-            COALESCE(descdependesemp, 'Sin información') AS \"Desc. Dependencia Semp\",
-            COALESCE(tipo_norma, 'Sin información') AS \"Tipo Norma\",
-            COALESCE(tipo_emite, 'Sin información') AS \"Tipo Emite\",
-            COALESCE(fec_norma::TEXT, 'Sin información') AS \"Fecha Norma\",
-            COALESCE(nro_norma, 'Sin información') AS \"Nro Norma\"
-        FROM 
-            docentes_mapuche
-        $whereClause
-        ORDER BY 
-            apellidonombre_desc, 
-            nro_docum,
-            desc_categ,
-            nro_cargo";
-
-        // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN
-        if ($perPage > 0) {
-            $sql .= " LIMIT :limit OFFSET :offset";
-        }
-
-        try {
-            $stmt = $this->conn->prepare($sql);
-            
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
-            }
-            
-            // ✅ SOLO BINDEAR LIMIT/OFFSET SI NO ES EXPORTACIÓN
-            if ($perPage > 0) {
-                $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            }
-            
-            $stmt->execute();
-            $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            return [
-                'data' => $resultados,
-                'total' => $this->contarDocentesMapuche($searchTerm, $year)
-            ];
-
-        } catch (PDOException $e) {
-            error_log("Error en obtenerDocentesMapuche: " . $e->getMessage());
-            return [
-                'data' => [],
-                'total' => 0,
-                'error' => $e->getMessage()
-            ];
-        }
+    $offset = ($page - 1) * $perPage;
+    $whereClause = '';
+    $params = [];
+    $conditions = [];
+    
+    // Siempre excluir estas categorías
+    $conditions[] = "codc_categ NOT IN ('Cat1', 'Cat2', 'Cat3', 'Cat4', 'Cat5', 'Cat6', 'Cat7')";
+    
+    if (!empty($searchTerm)) {
+        $conditions[] = "apellidonombre_desc ILIKE :searchTerm";
+        $params[':searchTerm'] = '%' . $searchTerm . '%';
+    }
+    
+    if ($year !== null && $year !== 'all') {
+        $conditions[] = "anio_id = :year";
+        $params[':year'] = $year;
+    }
+    
+    if (!empty($conditions)) {
+        $whereClause = " WHERE " . implode(" AND ", $conditions);
     }
 
-    public function contarDocentesMapuche($searchTerm = '', $year = null) {
-        $conditions = [];
-        $params = [];
-        
-        if (!empty($searchTerm)) {
-            $conditions[] = "apellidonombre_desc ILIKE :searchTerm";
-            $params[':searchTerm'] = '%' . $searchTerm . '%';
-        }
-        
-        if ($year !== null && $year !== 'all') {
-            $conditions[] = "anio_id = :year";
-            $params[':year'] = $year;
-        }
-        
-        $whereClause = '';
-        if (!empty($conditions)) {
-            $whereClause = " WHERE " . implode(" AND ", $conditions);
-        }
-        
-        $sql = "SELECT COUNT(*) FROM (
-            SELECT DISTINCT ON (
-                apellidonombre_desc, 
-                nro_docum,
-                desc_categ,
-                nro_cargo
-            ) 1
-            FROM docentes_mapuche
-            $whereClause
-        ) AS subquery";
-        
-        try {
-            $stmt = $this->conn->prepare($sql);
-            
-            foreach ($params as $key => $value) {
-                $stmt->bindValue($key, $value);
-            }
-            
-            $stmt->execute();
-            return (int)$stmt->fetchColumn();
-            
-        } catch (PDOException $e) {
-            error_log("Error en contarDocentesMapuche: " . $e->getMessage());
-            return 0;
-        }
+    $sql = "SELECT 
+    DISTINCT ON (
+        apellidonombre_desc, 
+        nro_docum,
+        desc_categ,
+        nro_cargo
+    )
+    COALESCE(nro_legaj, 'Sin información') AS \"Nro Legajo\",
+    COALESCE(apellidonombre_desc, 'Sin información') AS \"Apellido y Nombre\",
+    COALESCE(tipo_docum, 'Sin información') AS \"Tipo Doc.\",
+    COALESCE(nro_docum, 'Sin información') AS \"Nro Doc.\",
+    COALESCE(nro_cargo::TEXT, 'Sin información') AS \"Cargo\",
+    COALESCE(codc_categ, 'Sin información') AS \"Cod. Categoría\",
+    COALESCE(desc_categ, 'Sin información') AS \"Desc. Categoría\",
+    COALESCE(codc_carac, 'Sin información') AS \"Cod. Carácter\",
+    COALESCE(desc_grupo, 'Sin información') AS \"Desc. Carácter\",
+    COALESCE(fec_alta::TEXT, 'Sin información') AS \"Fecha Alta\",
+    COALESCE(fec_baja::TEXT, 'Sin información') AS \"Fecha Baja\",
+    COALESCE(nrovarlicencia, 'Sin información') AS \"Nro Var Licencia\",
+    COALESCE(fec_hasta::TEXT, 'Sin información') AS \"Fecha Hasta\",
+    COALESCE(codc_uacad, 'Sin información') AS \"Cod. Unidad Acad.\",
+    COALESCE(desc_item, 'Sin información') AS \"Desc. Unidad Acad.\",
+    COALESCE(descdependesemp, 'Sin información') AS \"Desc. Dependencia\",
+    COALESCE(tipo_norma, 'Sin información') AS \"Tipo Norma\",
+    COALESCE(tipo_emite, 'Sin información') AS \"Tipo Emite\",
+    COALESCE(fec_norma::TEXT, 'Sin información') AS \"Fecha Norma\",
+    COALESCE(nro_norma, 'Sin información') AS \"Nro Norma\"
+FROM 
+    docentes_mapuche
+$whereClause
+ORDER BY 
+    apellidonombre_desc, 
+    nro_docum,
+    desc_categ,
+    nro_cargo";
+
+    // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN
+    if ($perPage > 0) {
+        $sql .= " LIMIT :limit OFFSET :offset";
     }
 
-    // ================================
-    // 3. DOCENTES GUARANI 
-    // ================================
-    public function obtenerDocentesGuarani($page = 1, $perPage = 50, $searchTerm = '', $year = null) {
-        $offset = ($page - 1) * $perPage;
-        $whereConditions = [];
-        $params = [];
-
-        if (!empty($searchTerm)) {
-            $whereConditions[] = "num_doc_guarani::TEXT ILIKE :searchTerm";
-            $params[':searchTerm'] = '%' . $searchTerm . '%';
-        }
-
-        if ($year !== null && $year !== '' && $year !== 'all') {
-            $whereConditions[] = "anio_guarani = :year";
-            $params[':year'] = (int)$year;
-        }
-
-        $whereClause = '';
-        if (!empty($whereConditions)) {
-            $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
-        }
-
-        $sql = "SELECT 
-            COALESCE(responsabilidad_academica_guarani, 'Sin información') AS \"Resp. Acad.\",
-            COALESCE(propuesta_formativa_guarani, 'Sin información') AS \"Propuesta\",
-            COALESCE(comision_guarani, 'Sin información') AS \"Comisión\",
-            COALESCE(anio_guarani::TEXT, 'Sin información') AS \"Año\",
-            COALESCE(periodo_guarani, 'Sin información') AS \"Periodo\",
-            COALESCE(actividad_guarani, 'Sin información') AS \"Actividad\",
-            COALESCE(codigo_guarani, 'Sin información') AS \"Código\",
-            COALESCE(cursados_guarani, 'Sin información') AS \"Est\",
-            COALESCE(num_doc_guarani::TEXT, 'Sin información') AS \"Num. Doc.\"
-        FROM 
-            docentes_guarani
-        $whereClause
-        ORDER BY 
-            propuesta_formativa_guarani";
-
-        // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN
-        if ($perPage > 0) {
-            $sql .= " LIMIT :limit OFFSET :offset";
-        }
-
+    try {
         $stmt = $this->conn->prepare($sql);
         
         foreach ($params as $key => $value) {
@@ -360,12 +292,154 @@ class ConsultasDocentes {
         }
         
         $stmt->execute();
+        $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return [
-            'data' => $stmt->fetchAll(PDO::FETCH_ASSOC),
-            'total' => $this->contarDocentesGuarani($searchTerm, $year)
+            'data' => $resultados,
+            'total' => $this->contarDocentesMapuche($searchTerm, $year)
+        ];
+
+    } catch (PDOException $e) {
+        error_log("Error en obtenerDocentesMapuche: " . $e->getMessage());
+        return [
+            'data' => [],
+            'total' => 0,
+            'error' => $e->getMessage()
         ];
     }
+}
+
+    public function contarDocentesMapuche($searchTerm = '', $year = null) {
+    $conditions = [];
+    $params = [];
+    
+    // Siempre excluir estas categorías
+    $conditions[] = "codc_categ NOT IN ('Cat1', 'Cat2', 'Cat3', 'Cat4', 'Cat5', 'Cat6', 'Cat7')";
+    
+    if (!empty($searchTerm)) {
+        $conditions[] = "apellidonombre_desc ILIKE :searchTerm";
+        $params[':searchTerm'] = '%' . $searchTerm . '%';
+    }
+    
+    if ($year !== null && $year !== 'all') {
+        $conditions[] = "anio_id = :year";
+        $params[':year'] = $year;
+    }
+    
+    $whereClause = '';
+    if (!empty($conditions)) {
+        $whereClause = " WHERE " . implode(" AND ", $conditions);
+    }
+    
+    $sql = "SELECT COUNT(*) FROM (
+        SELECT DISTINCT ON (
+            apellidonombre_desc, 
+            nro_docum,
+            desc_categ,
+            nro_cargo
+        ) 1
+        FROM docentes_mapuche
+        $whereClause
+    ) AS subquery";
+    
+    try {
+        $stmt = $this->conn->prepare($sql);
+        
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+        
+    } catch (PDOException $e) {
+        error_log("Error en contarDocentesMapuche: " . $e->getMessage());
+        return 0;
+    }
+}
+
+    // ================================
+// 3. DOCENTES GUARANI 
+// ================================
+public function obtenerDocentesGuarani($page = 1, $perPage = 50, $searchTerm = '', $year = null) {
+    $offset = ($page - 1) * $perPage;
+    $whereConditions = [];
+    $params = [];
+
+    if (!empty($searchTerm)) {
+        $whereConditions[] = "num_doc_guarani::TEXT ILIKE :searchTerm";
+        $params[':searchTerm'] = '%' . $searchTerm . '%';
+    }
+
+    if ($year !== null && $year !== '' && $year !== 'all') {
+        $whereConditions[] = "anio_guarani = :year";
+        $params[':year'] = (int)$year;
+    }
+
+    $whereClause = '';
+    if (!empty($whereConditions)) {
+        $whereClause = 'WHERE ' . implode(' AND ', $whereConditions);
+    }
+
+    $sql = "SELECT DISTINCT ON (
+        responsabilidad_academica_guarani,
+        propuesta_formativa_guarani,
+        comision_guarani,
+        anio_guarani,
+        periodo_guarani,
+        actividad_guarani,
+        codigo_guarani,
+        cursados_guarani,
+        num_doc_guarani
+    )
+    COALESCE(responsabilidad_academica_guarani, 'Sin información') AS \"Resp. Acad.\",
+    COALESCE(propuesta_formativa_guarani, 'Sin información') AS \"Propuesta\",
+    COALESCE(comision_guarani, 'Sin información') AS \"Comisión\",
+    COALESCE(anio_guarani::TEXT, 'Sin información') AS \"Año\",
+    COALESCE(periodo_guarani, 'Sin información') AS \"Periodo\",
+    COALESCE(actividad_guarani, 'Sin información') AS \"Actividad\",
+    COALESCE(codigo_guarani, 'Sin información') AS \"Código\",
+    COALESCE(cursados_guarani, 'Sin información') AS \"Est\",
+    COALESCE(num_doc_guarani::TEXT, 'Sin información') AS \"Num. Doc.\"
+    FROM 
+        docentes_guarani
+    $whereClause
+    ORDER BY 
+        responsabilidad_academica_guarani,
+        propuesta_formativa_guarani,
+        comision_guarani,
+        anio_guarani,
+        periodo_guarani,
+        actividad_guarani,
+        codigo_guarani,
+        cursados_guarani,
+        num_doc_guarani,
+        propuesta_formativa_guarani";
+
+    // ✅ SOLO APLICAR LIMIT SI NO ES EXPORTACIÓN
+    if ($perPage > 0) {
+        $sql .= " LIMIT :limit OFFSET :offset";
+    }
+
+    $stmt = $this->conn->prepare($sql);
+    
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    
+    // ✅ SOLO BINDEAR LIMIT/OFFSET SI NO ES EXPORTACIÓN
+    if ($perPage > 0) {
+        $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    }
+    
+    $stmt->execute();
+
+    return [
+        'data' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+        'total' => $this->contarDocentesGuarani($searchTerm, $year)
+    ];
+}
 
     public function contarDocentesGuarani($searchTerm = '', $year = null) {
         $whereConditions = [];
