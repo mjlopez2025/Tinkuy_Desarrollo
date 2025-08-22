@@ -22,7 +22,7 @@ body {
 .app-main {
     flex: 1;
     padding: 1rem;
-    width: 100%;
+    width: 98%;
     border-bottom: 0px;
 }
 .app-footer {
@@ -221,7 +221,7 @@ tr:hover {
  .export-buttons {
     display: flex;
     gap: 0.5rem;
-    margin-left: auto; /* Empuja los botones a la derecha */
+    margin-left: 10px; /* Empuja los botones a la derecha */
 }
     /* Nuevas reglas para eliminar la línea gris */
     .app-container, .app-main, .query-panel {
@@ -677,3 +677,94 @@ th {
     transition: background-color 0.3s;
 }
 
+/* Nueva paginación con input - Sin márgenes */
+    .pagination-new {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0; /* Eliminamos cualquier margen */
+        padding: 0; /* Eliminamos cualquier padding */
+        gap: 8px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        border-bottom: none;
+    }
+
+    .pagination-new .btn-pagination {
+        background-color: white;
+        border: 1px solid #e0e0e0;
+        color: #333;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        min-height: 36px;
+        margin: 20px; /* Aseguramos que no tenga márgenes */
+    }
+
+    .pagination-new .btn-pagination:hover:not(.disabled) {
+        background-color: #f5f5f5;
+        border-color: #d0d0d0;
+        text-decoration: none;
+    }
+
+    .pagination-new .btn-pagination.disabled {
+        color: #999;
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.6;
+        background-color: #f8f8f8;
+    }
+
+    .pagination-new .pagination-text {
+        color: #666;
+        font-size: 14px;
+        margin: 0 4px; /* Reducimos márgenes horizontales */
+    }
+
+    .pagination-new .page-input {
+        width: 50px;
+        padding: 6px 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 500;
+        background-color: white;
+        transition: border-color 0.2s ease;
+        margin: 0; /* Sin márgenes */
+    }
+
+    .pagination-new .page-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    .pagination-new .page-go-btn {
+        background-color: #007bff;
+        border: 1px solid #007bff;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin: 0; /* Sin márgenes */
+    }
+
+    .pagination-new .page-go-btn:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    
+    /* Aseguramos que el contenedor principal tampoco tenga márgenes */
+    .pagination-container {
+        margin: 0;
+        padding: 0px;
+    }
